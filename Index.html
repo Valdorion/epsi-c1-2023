@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Les Meilleures Blagues de Chuck Norris</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            color: red;
+        }
+
+        #joke-container {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Les Meilleures Blagues de Chuck Norris</h1>
+        <button @click="refreshJoke">Rafraîchir</button>
+        <div id="joke-container">
+            <p>{{ translatedJoke }}</p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                joke: '',
+                translatedJoke: ''
+            },
+            methods: {
+                refreshJoke: function() {
+                    // Fait appel à l'API Chuck Norris pour obtenir une blague aléatoire
+                    fetch('https://api.chucknorris.io/jokes/random')
+                        .then(response => response.json())
+                        .then(data => {
+                            this.joke = data.value;
+                            this.translateJoke();
+                        })
+                        .catch(error => {
+                            console.error('Erreur lors de la récupération de la blague :', error);
+                        });
+                },
+                translateJoke: function() {
+                    // Clé d'API Google Cloud Translation
+                    const apiKey = 'VOTRE_CLE_API';
+
+                    // Fait appel à l'API Chuck Norris pour obtenir une blague aléatoire
+                    fetch(`https://translation.googleapis.com/language/translate/v2?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            q: this.joke,
+                            target: 'fr'
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.translatedJoke = data.data.translations[0].translatedText;
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la traduction de la blague :', error);
+                        this.translatedJoke = this.joke; // En cas d'erreur, affichez la blague originale
+                    });
+                }
+            },
+            mounted: function() {
+                // Charge la première blague lors du chargement de la page
+                this.refreshJoke();
+            }
+        });
+    </script>
+</body>
+</html>
