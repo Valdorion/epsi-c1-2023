@@ -40,7 +40,7 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://unpkg.com/vue@3"></script>
     <script>
-        /* async function translateWithDeepl(text) {
+        async function translateWithDeepl(text) {
             const url = 'https://deepl-translator.p.rapidapi.com/translate';
 
             const options = {
@@ -52,8 +52,8 @@
                 },
                 body: JSON.stringify({
                     text: text,
-                    source_lang: 'EN',
-                    target_lang: 'FR',
+                    source: 'EN',
+                    target: 'FR',
                 }),
             };
 
@@ -66,14 +66,14 @@
                 // En cas d'erreur, renvoie le texte original
                 return text;
             }
-        } */
+        } 
 
         Vue.createApp({
-            data: {
+            data() {return {
                 joke: '',
                 translatedJoke: '',
                 randomChuckNorrisGif: ''
-            },
+            }},
             methods: {
                 refreshJokeAndGif: async function() {
                     // Fait appel à l'API Chuck Norris pour obtenir une blague aléatoire
@@ -83,7 +83,6 @@
                             this.joke = data.value;
                             // Traduit la blague avec Deepl
                             this.translatedJoke = await translateWithDeepl(this.joke);
-                            return this.translatedJoke;
                         })
                         .catch(error => {
                             console.error('Erreur lors de la récupération de la blague :', error);
@@ -94,7 +93,7 @@
                     fetch(`https://api.tenor.com/v1/random?q=chuck+norris&key=${apiKeyTenor}`)
                         .then(response => response.json())
                         .then(data => {
-                            return this.randomChuckNorrisGif = data.results[0].media[0].gif.url;
+                            this.randomChuckNorrisGif = data.results[0].media[0].gif.url;
                         })
                         .catch(error => {
                             console.error('Erreur lors de la récupération du GIF :', error);
@@ -105,7 +104,7 @@
                 // Charge la première blague lors du chargement de la page
                 this.refreshJokeAndGif();
             }
-        });
+        }).mount('#app');
     </script>
 </body>
 </html>
