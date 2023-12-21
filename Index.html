@@ -31,28 +31,58 @@
         <h1>Les Meilleures Blagues de Chuck Norris</h1>
         <button @click="refreshJokeAndGif">Rafraîchir</button>
         <div id="joke-container">
-            <p>{{ joke }}</p>
+            <p>{{ translatedJoke }}</p>
         </div>
         <div id="gif-container">
             <img :src="randomChuckNorrisGif" alt="Chuck Norris GIF">
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue@3"></script>
     <script>
-        new Vue({
-            el: '#app',
+        async function translateWithDeepl(text) {
+            const url = 'https://deepl-translator.p.rapidapi.com/translate';
+
+            const options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-RapidAPI-Key': '062f8be081msh26559d4a94a4eb0p1b2f1ajsn1972aefd2af6',
+                    'X-RapidAPI-Host': 'deepl-translator.p.rapidapi.com',
+                },
+                body: JSON.stringify({
+                    text: text,
+                    source_lang: 'EN',
+                    target_lang: 'FR',
+                }),
+            };
+
+            try {
+                const response = await fetch(url, options);
+                const result = await response.json();
+                return result.text;
+            } catch (error) {
+                console.error('Erreur lors de la traduction avec Deepl :', error);
+                // En cas d'erreur, renvoie le texte original
+                return text;
+            }
+        }
+
+        Vue.createApp({
             data: {
                 joke: '',
+                translatedJoke: '',
                 randomChuckNorrisGif: ''
             },
             methods: {
-                refreshJokeAndGif: function() {
+                refreshJokeAndGif: async function() {
                     // Fait appel à l'API Chuck Norris pour obtenir une blague aléatoire
                     fetch('https://api.chucknorris.io/jokes/random')
                         .then(response => response.json())
-                        .then(data => {
+                        .then(async data => {
                             this.joke = data.value;
+                            // Traduit la blague avec Deepl
+                            this.translatedJoke = await translateWithDeepl(this.joke);
                         })
                         .catch(error => {
                             console.error('Erreur lors de la récupération de la blague :', error);
@@ -68,9 +98,9 @@
                         .catch(error => {
                             console.error('Erreur lors de la récupération du GIF :', error);
                         });
-                }
+                },
             },
-            mounted: function() {
+            mounted: function(){
                 // Charge la première blague lors du chargement de la page
                 this.refreshJokeAndGif();
             }
